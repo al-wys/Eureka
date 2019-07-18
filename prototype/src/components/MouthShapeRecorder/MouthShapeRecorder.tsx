@@ -9,6 +9,9 @@ const RecordRTC = require('recordrtc/RecordRTC.min');
 const hasGetUserMedia = !!(navigator.getUserMedia || (navigator as any).webkitGetUserMedia ||
     (navigator as any).mozGetUserMedia || (navigator as any).msGetUserMedia);
 
+const _video = document.createElement('video');
+const supportSrcObj = 'srcObject' in _video;
+
 function captureUserMedia(callback: (stream: MediaStream) => void, onFailed?: (error: MediaStreamError) => void) {
     const params = { audio: true, video: true };
 
@@ -27,7 +30,9 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     constructor(props: IMouthShapeRecorderProps) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            videoSource: {}
+        };
     }
 
     public componentDidMount() {
@@ -40,8 +45,15 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
 
     public render() {
         return (
-            <Stack styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
-                <video autoPlay={true} muted={true} src={this.state.src} />
+            <Stack tokens={{ childrenGap: 5 }} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
+                <video
+                    autoPlay={true}
+                    muted={true}
+                    {...supportSrcObj ?
+                        { ref: (v) => { v && (v.srcObject = this.state.videoSource.srcObject) } } :
+                        { src: this.state.videoSource.src }
+                    }
+                />
                 <Stack horizontal={true} horizontalAlign="center" tokens={{ childrenGap: 15 }}>
                     <PrimaryButton disabled={!hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
                     <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
@@ -54,7 +66,11 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
         console.log('requestUserMedia');
 
         captureUserMedia((stream) => {
-            this.setState({ src: window.URL.createObjectURL(stream) });
+            if (supportSrcObj) {
+                this.setState({ videoSource: { srcObject: stream } });
+            } else {
+                this.setState({ videoSource: { src: window.URL.createObjectURL(stream) } });
+            }
             // console.log('setting state', this.state);
         });
     }

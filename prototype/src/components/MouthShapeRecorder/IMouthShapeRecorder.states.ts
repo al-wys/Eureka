@@ -1,4 +1,4 @@
 export interface IMouthShapeRecorderState {
     isRecording?: boolean;
-    src?: string;
+    videoSource: { src?: string, srcObject?: any }
 }
