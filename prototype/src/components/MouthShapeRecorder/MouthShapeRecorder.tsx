@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Stack, PrimaryButton } from 'office-ui-fabric-react';
+import { Stack, PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
 import { IMouthShapeRecorderProps } from './IMouthShapeRecorder.types';
 import { IMouthShapeRecorderState } from './IMouthShapeRecorder.states';
 
@@ -26,6 +26,7 @@ function captureUserMedia(callback: (stream: MediaStream) => void, onFailed?: (e
 
 export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps, IMouthShapeRecorderState> {
     private recordVideo: any;
+    private videoStreams: MediaStream[] = [];
 
     constructor(props: IMouthShapeRecorderProps) {
         super(props);
@@ -38,34 +39,45 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     public componentDidMount() {
         if (!hasGetUserMedia) {
             alert('Current broswer is not supported, please use Chrome, Firefox or Edge Preview.');
-        } else {
-            this.requestUserMedia();
         }
     }
 
     public render() {
         return (
             <Stack tokens={{ childrenGap: 5 }} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
-                <video
-                    autoPlay={true}
-                    muted={true}
-                    {...supportSrcObj ?
-                        { ref: (v) => { v && (v.srcObject = this.state.videoSource.srcObject) } } :
-                        { src: this.state.videoSource.src }
+                <Stack>
+                    {this.state.isAllowed ? (
+                        <video
+                            autoPlay={true}
+                            muted={true}
+                            {...supportSrcObj ?
+                                { ref: (v) => { v && (v.srcObject = this.state.videoSource.srcObject) } } :
+                                { src: this.state.videoSource.src }
+                            }
+                        />) : (
+                            <PrimaryButton text="Ready to turn on camera" onClick={this.requestUserMedia} />
+                        )
                     }
-                />
+                </Stack>
                 <Stack horizontal={true} horizontalAlign="center" tokens={{ childrenGap: 15 }}>
-                    <PrimaryButton disabled={!hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
+                    <PrimaryButton disabled={!this.state.isAllowed || !hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
                     <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
+                </Stack>
+                <Stack>
+                    <DefaultButton disabled={!this.state.isAllowed || this.state.isRecording} text="Turn off camera" onClick={this.turnOffCamera} />
                 </Stack>
             </Stack>
         );
     }
 
-    private requestUserMedia() {
+    private requestUserMedia = () => {
         console.log('requestUserMedia');
 
+        this.setState({ isAllowed: true });
+
         captureUserMedia((stream) => {
+            this.videoStreams.push(stream);
+
             if (supportSrcObj) {
                 this.setState({ videoSource: { srcObject: stream } });
             } else {
@@ -75,10 +87,18 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
         });
     }
 
+    private turnOffCamera = () => {
+        this.setState({ isAllowed: false });
+        this.videoStreams.forEach(vs => vs.getTracks().forEach(t => t.stop()));
+        this.videoStreams = [];
+    }
+
     private startRecord = () => {
         this.setState({ isRecording: true });
 
         captureUserMedia((stream) => {
+            this.videoStreams.push(stream);
+
             this.recordVideo = RecordRTC(stream, { type: 'video' });
             this.recordVideo.startRecording();
         }, () => this.setState({ isRecording: false }));
