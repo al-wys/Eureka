@@ -1,6 +1,6 @@
 import React from 'react';
-import { Stack, Text } from 'office-ui-fabric-react';
-import { MouthShapeRecorder } from './components';
+import { Stack } from 'office-ui-fabric-react';
+import { RecordAndLearn } from './components';
 
 export const App: React.FunctionComponent = () => {
   return (
@@ -10,7 +10,7 @@ export const App: React.FunctionComponent = () => {
       verticalFill
       styles={{
         root: {
-          width: '960px',
+          width: '1100px',
           margin: '0 auto',
           textAlign: 'center',
           color: '#605e5c'
@@ -18,14 +18,7 @@ export const App: React.FunctionComponent = () => {
       }}
       tokens={{ childrenGap: 15 }}
     >
-      <Stack horizontal tokens={{ childrenGap: 15 }} horizontalAlign="center">
-        <Stack grow={1}>
-          <MouthShapeRecorder />
-        </Stack>
-        <Stack grow={1} horizontalAlign="center" verticalAlign="center">
-          <Text>Please record in left</Text>
-        </Stack>
-      </Stack>
+      <RecordAndLearn />
     </Stack>
   );
 };
