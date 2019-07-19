@@ -5,5 +5,6 @@ export interface IMouthShapeRecorderProps {
 
     onStartRecording?: () => void;
     onStopRecording?: () => void;
+    onPreviewRecording?: (video: Blob) => void;
     onSaveRecording?: (video: Blob) => void;
 }

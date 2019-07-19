@@ -59,10 +59,15 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                         )
                     }
                 </Stack>
-                <Stack horizontal={true} horizontalAlign="center" tokens={{ childrenGap: 15 }}>
-                    <PrimaryButton disabled={!this.state.isAllowed || !hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
-                    <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
-                    <PrimaryButton disabled={this.state.isRecording !== false} text="Save recording" onClick={this.saveRecord} />
+                <Stack horizontal={true} horizontalAlign="space-between" tokens={{ childrenGap: 15 }}>
+                    <Stack tokens={{ childrenGap: 5 }} grow={1}>
+                        <PrimaryButton disabled={!this.state.isAllowed || !hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
+                        <DefaultButton disabled={this.state.isRecording !== false || !this.props.onPreviewRecording} text="Preview recording" onClick={this.previewRecord} />
+                    </Stack>
+                    <Stack tokens={{ childrenGap: 5 }} grow={1}>
+                        <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
+                        <PrimaryButton disabled={this.state.isRecording !== false || !this.props.onSaveRecording} text="Save recording" onClick={this.saveRecord} />
+                    </Stack>
                 </Stack>
                 <Stack>
                     <DefaultButton disabled={!this.state.isAllowed || this.state.isRecording} text="Turn off camera" onClick={this.turnOffCamera} />
@@ -74,7 +79,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     private turnOnCamera = () => {
         captureUserMedia((stream) => {
             console.log('requestUserMedia');
-            
+
             this.videoStream = stream;
 
             if (supportSrcObj) {
@@ -83,13 +88,14 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                 this.setState({ videoSource: { src: window.URL.createObjectURL(stream) } });
             }
 
-            this.setState({ isAllowed: true });
+            this.setState({ isAllowed: true, isRecording: undefined });
+            this.recordVideo = null;
             // console.log('setting state', this.state);
         });
     }
 
     private turnOffCamera = () => {
-        this.setState({ isAllowed: false, isRecording: undefined });
+        this.setState({ isAllowed: false });
         this.videoStream!.getTracks().forEach(t => t.stop());
         this.videoStream = undefined;
     }
@@ -99,6 +105,10 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
 
         this.recordVideo = RecordRTC(this.videoStream, { type: 'video' });
         this.recordVideo.startRecording();
+
+        if (this.props.onStartRecording) {
+            this.props.onStartRecording();
+        }
     }
 
     private stopRecord = () => {
@@ -111,6 +121,16 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
             //     id: Math.floor(Math.random() * 90000) + 10000
             // };
         });
+
+        if (this.props.onStopRecording) {
+            this.props.onStopRecording();
+        }
+    }
+
+    private previewRecord = () => {
+        if (this.props.onPreviewRecording) {
+            this.props.onPreviewRecording(this.recordVideo.blob);
+        }
     }
 
     private saveRecord = () => {

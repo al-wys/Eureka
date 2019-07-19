@@ -17,7 +17,7 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
         return (
             <Stack horizontal tokens={{ childrenGap: 15 }} horizontalAlign="center">
                 <Stack grow={1}>
-                    <MouthShapeRecorder onSaveRecording={this.saveRecord} />
+                    <MouthShapeRecorder onPreviewRecording={this.previewRecord} />
                 </Stack>
                 <Stack grow={1} horizontalAlign="center" verticalAlign="center">
                     {this.state.savedRecordUrl ?
@@ -29,8 +29,8 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
         );
     }
 
-    private saveRecord = (record: Blob) => {
-        const res = videoService.save(record);
+    private previewRecord = (record: Blob) => {
+        const res = videoService.preview(record);
         this.setState({ savedRecordUrl: res.url });
     }
 }
