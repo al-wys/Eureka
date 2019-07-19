@@ -44,7 +44,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
 
     public render() {
         return (
-            <Stack tokens={{ childrenGap: 5 }} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
+            <Stack tokens={{ childrenGap: 5 }} verticalAlign="center" verticalFill={true} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
                 <Stack>
                     {this.state.isAllowed ? (
                         <video
