@@ -26,7 +26,7 @@ function captureUserMedia(callback: (stream: MediaStream) => void, onFailed?: (e
 
 export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps, IMouthShapeRecorderState> {
     private recordVideo: any;
-    private videoStreams: MediaStream[] = [];
+    private videoStream?: MediaStream;
 
     constructor(props: IMouthShapeRecorderProps) {
         super(props);
@@ -55,7 +55,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                                 { src: this.state.videoSource.src }
                             }
                         />) : (
-                            <PrimaryButton text="Ready to turn on camera" onClick={this.requestUserMedia} />
+                            <PrimaryButton text="Ready to turn on camera" onClick={this.turnOnCamera} />
                         )
                     }
                 </Stack>
@@ -71,38 +71,34 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
         );
     }
 
-    private requestUserMedia = () => {
-        console.log('requestUserMedia');
-
-        this.setState({ isAllowed: true });
-
+    private turnOnCamera = () => {
         captureUserMedia((stream) => {
-            this.videoStreams.push(stream);
+            console.log('requestUserMedia');
+            
+            this.videoStream = stream;
 
             if (supportSrcObj) {
                 this.setState({ videoSource: { srcObject: stream } });
             } else {
                 this.setState({ videoSource: { src: window.URL.createObjectURL(stream) } });
             }
+
+            this.setState({ isAllowed: true });
             // console.log('setting state', this.state);
         });
     }
 
     private turnOffCamera = () => {
         this.setState({ isAllowed: false, isRecording: undefined });
-        this.videoStreams.forEach(vs => vs.getTracks().forEach(t => t.stop()));
-        this.videoStreams = [];
+        this.videoStream!.getTracks().forEach(t => t.stop());
+        this.videoStream = undefined;
     }
 
     private startRecord = () => {
         this.setState({ isRecording: true });
 
-        captureUserMedia((stream) => {
-            this.videoStreams.push(stream);
-
-            this.recordVideo = RecordRTC(stream, { type: 'video' });
-            this.recordVideo.startRecording();
-        }, () => this.setState({ isRecording: false }));
+        this.recordVideo = RecordRTC(this.videoStream, { type: 'video' });
+        this.recordVideo.startRecording();
     }
 
     private stopRecord = () => {
