@@ -62,6 +62,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                 <Stack horizontal={true} horizontalAlign="center" tokens={{ childrenGap: 15 }}>
                     <PrimaryButton disabled={!this.state.isAllowed || !hasGetUserMedia || this.state.isRecording} text="Start recording" onClick={this.startRecord} />
                     <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
+                    <PrimaryButton disabled={this.state.isRecording !== false} text="Save recording" onClick={this.saveRecord} />
                 </Stack>
                 <Stack>
                     <DefaultButton disabled={!this.state.isAllowed || this.state.isRecording} text="Turn off camera" onClick={this.turnOffCamera} />
@@ -88,7 +89,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     }
 
     private turnOffCamera = () => {
-        this.setState({ isAllowed: false });
+        this.setState({ isAllowed: false, isRecording: undefined });
         this.videoStreams.forEach(vs => vs.getTracks().forEach(t => t.stop()));
         this.videoStreams = [];
     }
@@ -114,5 +115,11 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
             //     id: Math.floor(Math.random() * 90000) + 10000
             // };
         });
+    }
+
+    private saveRecord = () => {
+        if (this.props.onSaveRecording) {
+            this.props.onSaveRecording(this.recordVideo.blob);
+        }
     }
 }
