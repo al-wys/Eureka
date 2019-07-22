@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Stack, Text } from 'office-ui-fabric-react';
+import { Stack, Text, DefaultButton } from 'office-ui-fabric-react';
 import { MouthShapeRecorder } from '../MouthShapeRecorder';
 import { IRecordAndLearnState } from './IRecordAndLearn.states';
 import videoService from '../../services/videoService';
@@ -19,11 +19,20 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
                 <Stack grow={1}>
                     <MouthShapeRecorder onPreviewRecording={this.previewRecord} />
                 </Stack>
-                <Stack grow={1} horizontalAlign="center" verticalAlign="center">
-                    {this.state.savedRecordUrl ?
-                        <MouthShapePlayer src={this.state.savedRecordUrl} key="player" /> :
+                <Stack grow={1} horizontalAlign="center" verticalAlign="center" tokens={{ childrenGap: 5 }}>
+                    {this.state.savedRecordUrl ? (
+                        <>
+                            <Stack.Item grow={1}>
+                                <MouthShapePlayer src={this.state.savedRecordUrl} key="player" />
+                            </Stack.Item>
+                            <Stack.Item grow={1}>
+                                <DefaultButton text="Close player" onClick={this.closePlayer} />
+                            </Stack.Item>
+                        </>
+                    ) :
                         <Text>Please record in left</Text>
                     }
+
                 </Stack>
             </Stack>
         );
@@ -32,5 +41,9 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
     private previewRecord = (record: Blob) => {
         const res = videoService.preview(record);
         this.setState({ savedRecordUrl: res.url });
+    }
+
+    private closePlayer = () => {
+        this.setState({ savedRecordUrl: undefined });
     }
 }
