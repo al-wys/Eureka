@@ -53,7 +53,7 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps> {
         this.getPoints(true);
         setTimeout(() => {
             this.video!.play();
-        }, 3000);
+        }, 5000);
     }
 
     private async getPoints(force?: boolean) {
