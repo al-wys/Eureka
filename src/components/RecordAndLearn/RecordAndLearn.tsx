@@ -21,7 +21,7 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
                 </Stack>
                 <Stack grow={1} horizontalAlign="center" verticalAlign="center">
                     {this.state.savedRecordUrl ?
-                        <MouthShapePlayer src={this.state.savedRecordUrl} /> :
+                        <MouthShapePlayer src={this.state.savedRecordUrl} key="player" /> :
                         <Text>Please record in left</Text>
                     }
                 </Stack>
