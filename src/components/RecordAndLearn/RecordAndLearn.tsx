@@ -17,7 +17,7 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
         return (
             <Stack horizontal tokens={{ childrenGap: 15 }} horizontalAlign="center">
                 <Stack grow={1}>
-                    <MouthShapeRecorder onPreviewRecording={this.previewRecord} />
+                    <MouthShapeRecorder onPreviewRecording={this.previewRecord} key="recorder" />
                 </Stack>
                 <Stack grow={1} horizontalAlign="center" verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     {this.state.savedRecordUrl ? (
