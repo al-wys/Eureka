@@ -3,23 +3,15 @@ import React from 'react';
 import { IMouthShapePlayerProps } from './IMouthShapePlayer.types';
 import { Stack, PrimaryButton } from 'office-ui-fabric-react';
 
-import * as faceapi from 'face-api.js';
+import FaceDetecterHelper from '../../utils/FaceDetecterHelper';
 
 export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps> {
     private faceMarkCanvas: HTMLCanvasElement | null = null;
     private video: HTMLVideoElement | null = null;
-    private loadModelTask?: Promise<void>;
+    private loadFaceDetectTask?: Promise<void>;
 
     public componentDidMount() {
-        // this.loadModelTask = faceapi.nets.tinyFaceDetector.load('/weights').then(() => {
-        //     return faceapi.loadFaceLandmarkModel('/weights');
-        // });
-        this.loadModelTask = new Promise(async (resolve) => {
-            await faceapi.nets.tinyFaceDetector.load('/weights');
-            await faceapi.loadFaceLandmarkModel('/weights');
-
-            resolve();
-        });
+        this.loadFaceDetectTask = FaceDetecterHelper.init();
         console.log('componentDidMount');
     }
 
@@ -47,8 +39,8 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps> {
     }
 
     private onLoadVideo = async () => {
-        if (!this.loadModelTask) return;
-        await this.loadModelTask;
+        if (!this.loadFaceDetectTask) return;
+        await this.loadFaceDetectTask;
 
         this.getPoints(true);
         setTimeout(() => {
@@ -60,15 +52,7 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps> {
         if (this.video!.ended) return;
 
         if (force || !this.video!.paused) {
-            const res = await faceapi.detectSingleFace(this.video as any, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })).withFaceLandmarks();
-            console.log(res);
-            if (res) {
-                const dims = faceapi.matchDimensions(this.faceMarkCanvas!, this.video!, true);
-                const resizedRes = faceapi.resizeResults(res, dims);
-
-                faceapi.draw.drawFaceLandmarks(this.faceMarkCanvas!, resizedRes);
-                faceapi.draw.drawDetections(this.faceMarkCanvas!, resizedRes);
-            }
+            await FaceDetecterHelper.drawFaceMark(this.video!, this.faceMarkCanvas!);
         }
 
         setTimeout(() => {
