@@ -6,7 +6,12 @@ import { IRecordAndLearnState } from './IRecordAndLearn.states';
 import videoService from '../../services/videoService';
 import { MouthShapePlayer } from '../MouthShapePlayer';
 
+import { getId } from 'office-ui-fabric-react';
+
 export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
+    private playerId: string = getId('player');
+    private recorderId: string = getId('recorder');
+
     constructor(props: {}) {
         super(props);
 
@@ -17,13 +22,13 @@ export class RecordAndLearn extends React.Component<{}, IRecordAndLearnState> {
         return (
             <Stack horizontal tokens={{ childrenGap: 15 }} horizontalAlign="center">
                 <Stack grow={1}>
-                    <MouthShapeRecorder onPreviewRecording={this.previewRecord} key="recorder" />
+                    <MouthShapeRecorder onPreviewRecording={this.previewRecord} key={this.recorderId} />
                 </Stack>
                 <Stack grow={1} horizontalAlign="center" verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     {this.state.savedRecordUrl ? (
                         <>
                             <Stack.Item grow={1}>
-                                <MouthShapePlayer src={this.state.savedRecordUrl} key="player" />
+                                <MouthShapePlayer src={this.state.savedRecordUrl} key={this.playerId} />
                             </Stack.Item>
                             <Stack.Item grow={1}>
                                 <DefaultButton text="Close player" onClick={this.closePlayer} />
