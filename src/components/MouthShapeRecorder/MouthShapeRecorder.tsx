@@ -4,7 +4,6 @@ import { Stack, PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
 import { IMouthShapeRecorderProps } from './IMouthShapeRecorder.types';
 import { IMouthShapeRecorderState } from './IMouthShapeRecorder.states';
 import FaceDetecterHelper from '../../utils/FaceDetecterHelper';
-import { AudioAnalyser } from '../AudioAnalyser';
 
 import { getId } from 'office-ui-fabric-react';
 
@@ -98,12 +97,9 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                                 />
                                 <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
                             </Stack>
-                            <Stack styles={{ root: { minHeight: '100px' } }}>
-                                {this.state.isRecording ?
-                                    <AudioAnalyser audio={this.state.videoSource.srcObject} addOnEndEventListener={(func) => this.onStopRecordFunc = func} key={this.audioAnaId} /> :
-                                    <></>
-                                }
-                            </Stack>
+                            {/* <Stack styles={{ root: { minHeight: '100px' } }}>
+                                <AudioAnalyser audio={this.state.videoSource.srcObject} addOnEndEventListener={(func) => this.onStopRecordFunc = func} key={this.audioAnaId} />
+                            </Stack> */}
                         </>
                     ) : (
                             <PrimaryButton text="Ready to turn on camera" onClick={this.turnOnCamera} />
