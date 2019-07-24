@@ -4,6 +4,9 @@ import { Stack, PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
 import { IMouthShapeRecorderProps } from './IMouthShapeRecorder.types';
 import { IMouthShapeRecorderState } from './IMouthShapeRecorder.states';
 import FaceDetecterHelper from '../../utils/FaceDetecterHelper';
+import { AudioAnalyser } from '../AudioAnalyser';
+
+import { getId } from 'office-ui-fabric-react';
 
 const RecordRTC = require('recordrtc/RecordRTC.min');
 
@@ -36,6 +39,7 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     private loadFaceDetectTask?: Promise<void>;
 
     private videoRef: any;
+    private audioAnaId: string = getId('audioAna');
 
     constructor(props: IMouthShapeRecorderProps) {
         super(props);
@@ -80,16 +84,21 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     public render() {
         return (
             <Stack tokens={{ childrenGap: 5 }} verticalAlign="center" verticalFill={true} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
-                <Stack styles={{ root: { position: 'relative' } }}>
+                <Stack>
                     {this.state.isAllowed ? (
                         <>
-                            <video
-                                autoPlay={true}
-                                muted={true}
-                                ref={this.videoRef}
-                                src={supportSrcObj ? undefined : this.state.videoSource.src}
-                            />
-                            <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
+                            <Stack styles={{ root: { position: 'relative' } }}>
+                                <video
+                                    autoPlay={true}
+                                    muted={true}
+                                    ref={this.videoRef}
+                                    src={supportSrcObj ? undefined : this.state.videoSource.src}
+                                />
+                                <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
+                            </Stack>
+                            <Stack styles={{ root: { minHeight: '100px' } }}>
+                                <AudioAnalyser audio={this.state.videoSource.srcObject} key={this.audioAnaId} />
+                            </Stack>
                         </>
                     ) : (
                             <PrimaryButton text="Ready to turn on camera" onClick={this.turnOnCamera} />
@@ -129,13 +138,11 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
 
             this.videoStream = stream;
 
-            if (supportSrcObj) {
-                this.setState({ videoSource: { srcObject: stream } });
-            } else {
+            if (!supportSrcObj) {
                 this.setState({ videoSource: { src: window.URL.createObjectURL(stream) } });
             }
 
-            this.setState({ isAllowed: true, isRecording: undefined });
+            this.setState({ videoSource: { srcObject: stream }, isAllowed: true, isRecording: undefined });
             this.recordVideo = null;
             // console.log('setting state', this.state);
         });
