@@ -36,6 +36,9 @@ export class AudioAnalyser extends React.Component<IAudioAnalyserProps, IAudioAn
 
         this.props.addOnEndEventListener(() => {
             this.setState({ audioData: this.audioTimeData });
+            cancelAnimationFrame(this.rafId);
+            this.analyser!.disconnect();
+            this.source!.disconnect();
         });
     }
 
