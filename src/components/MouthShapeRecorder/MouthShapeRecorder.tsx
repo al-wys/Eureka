@@ -38,6 +38,8 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     private video: HTMLVideoElement | null = null;
     private loadFaceDetectTask?: Promise<void>;
 
+    private onStopRecordFunc?: () => void;
+
     private videoRef: any;
     private audioAnaId: string = getId('audioAna');
 
@@ -97,7 +99,10 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                                 <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
                             </Stack>
                             <Stack styles={{ root: { minHeight: '100px' } }}>
-                                <AudioAnalyser audio={this.state.videoSource.srcObject} key={this.audioAnaId} />
+                                {this.state.isRecording ?
+                                    <AudioAnalyser audio={this.state.videoSource.srcObject} addOnEndEventListener={(func) => this.onStopRecordFunc = func} key={this.audioAnaId} /> :
+                                    <></>
+                                }
                             </Stack>
                         </>
                     ) : (
@@ -178,6 +183,10 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
 
         if (this.props.onStopRecording) {
             this.props.onStopRecording();
+        }
+
+        if (this.onStopRecordFunc) {
+            this.onStopRecordFunc();
         }
     }
 

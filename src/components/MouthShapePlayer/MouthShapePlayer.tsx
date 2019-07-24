@@ -14,6 +14,8 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
     private video: HTMLVideoElement | null = null;
     private loadFaceDetectTask?: Promise<void>;
 
+    private onEndFunc?: () => void;
+
     private audioAnaId: string = getId('audioAna');
 
     constructor(props: IMouthShapePlayerProps) {
@@ -39,6 +41,7 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
                                 width="auto"
                                 ref={(ins) => this.video = ins}
                                 onLoadedMetadata={this.onLoadVideo}
+                                onEnded={() => this.onEndFunc && this.onEndFunc()}
                             >
                                 <source src={this.props.src} type={this.props.type} />
                             </video>
@@ -46,7 +49,7 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
                         </Stack>
                         <Stack styles={{ root: { minHeight: '100px' } }}>
                             {this.state.videoMedia ?
-                                <AudioAnalyser audio={this.state.videoMedia} key={this.audioAnaId} /> :
+                                <AudioAnalyser audio={this.state.videoMedia} addOnEndEventListener={(func) => this.onEndFunc = func} key={this.audioAnaId} /> :
                                 <></>
                             }
                         </Stack>

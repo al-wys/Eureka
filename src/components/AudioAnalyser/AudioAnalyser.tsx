@@ -13,6 +13,8 @@ export class AudioAnalyser extends React.Component<IAudioAnalyserProps, IAudioAn
     private source?: MediaStreamAudioSourceNode;
     private rafId: number = -1;
 
+    private audioTimeData: Uint8Array = new Uint8Array();
+
     private audioVisId: string = getId('audioVisId');
 
     constructor(props: IAudioAnalyserProps) {
@@ -31,6 +33,10 @@ export class AudioAnalyser extends React.Component<IAudioAnalyserProps, IAudioAn
         this.source = this.audioContext!.createMediaStreamSource(this.props.audio);
         this.source.connect(this.analyser);
         this.rafId = requestAnimationFrame(this.tick);
+
+        this.props.addOnEndEventListener(() => {
+            this.setState({ audioData: this.audioTimeData });
+        });
     }
 
     public componentWillUnmount() {
@@ -46,6 +52,14 @@ export class AudioAnalyser extends React.Component<IAudioAnalyserProps, IAudioAn
     private tick = () => {
         this.analyser!.getByteTimeDomainData(this.dataArray!);
         this.setState({ audioData: this.dataArray! });
+        this.audioTimeData = this.concatTypedArrays(this.audioTimeData, this.dataArray!);
         this.rafId = requestAnimationFrame(this.tick);
+    }
+
+    private concatTypedArrays(a: any, b: any) { // a, b TypedArray of same type
+        var c = new (a.constructor)(a.length + b.length);
+        c.set(a, 0);
+        c.set(b, a.length);
+        return c;
     }
 }
