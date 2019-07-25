@@ -82,6 +82,10 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
         }
     }
 
+    public componentWillUnmount() {
+        this.turnOffCamera();
+    }
+
     public render() {
         return (
             <Stack tokens={{ childrenGap: 5 }} verticalAlign="center" verticalFill={true} styles={{ root: { width: this.props.width, height: this.props.height } }} className={this.props.className}>
@@ -113,7 +117,10 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
                     </Stack>
                     <Stack tokens={{ childrenGap: 5 }} grow={1}>
                         <PrimaryButton disabled={!this.state.isRecording} text="Stop recording" onClick={this.stopRecord} />
-                        <PrimaryButton disabled={this.state.isRecording !== false || !this.props.onSaveRecording} text="Save recording" onClick={this.saveRecord} />
+                        {this.props.onSaveRecording ?
+                            <PrimaryButton disabled={this.state.isRecording !== false} text="Save recording" onClick={this.saveRecord} /> :
+                            <></>
+                        }
                     </Stack>
                 </Stack>
                 <Stack>
@@ -150,9 +157,11 @@ export class MouthShapeRecorder extends React.Component<IMouthShapeRecorderProps
     }
 
     private turnOffCamera = () => {
-        this.setState({ isAllowed: false });
-        this.videoStream!.getTracks().forEach(t => t.stop());
-        this.videoStream = undefined;
+        if (this.videoStream) {
+            this.setState({ isAllowed: false });
+            this.videoStream.getTracks().forEach(t => t.stop());
+            this.videoStream = undefined;
+        }
     }
 
     private startRecord = () => {

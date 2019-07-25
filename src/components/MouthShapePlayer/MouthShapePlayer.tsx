@@ -2,12 +2,14 @@ import React from 'react';
 
 import { IMouthShapePlayerProps } from './IMouthShapePlayer.types';
 import { IMouthShapePlayerState } from './IMouthShapePlayer.states';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack, Text } from 'office-ui-fabric-react';
 
 import FaceDetecterHelper from '../../utils/FaceDetecterHelper';
 import { AudioAnalyser } from '../AudioAnalyser';
 
 import { getId } from 'office-ui-fabric-react';
+
+const waitSec = 5;
 
 export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IMouthShapePlayerState> {
     private faceMarkCanvas: HTMLCanvasElement | null = null;
@@ -18,20 +20,32 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
 
     private audioAnaId: string = getId('audioAna');
 
+    private sec = 0;
+
     constructor(props: IMouthShapePlayerProps) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            text: `This video will start in ${waitSec} sec.`
+        };
     }
 
     public componentDidMount() {
         this.loadFaceDetectTask = FaceDetecterHelper.init();
+
+        setTimeout(() => {
+            this.refreshText();
+        }, 1000);
+
         console.log('componentDidMount');
     }
 
     public render() {
         return (
             <Stack styles={{ root: { height: this.props.height || "auto", width: this.props.width || "auto" } }} tokens={{ childrenGap: 5 }} className={this.props.className}>
+                <Stack>
+                    <Text>{this.state.text}</Text>
+                </Stack>
                 <Stack styles={{ root: { position: 'relative' } }}>
                     <>
                         <Stack styles={{ root: { position: 'relative' } }}>
@@ -71,7 +85,7 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
         setTimeout(() => {
             this.setState({ videoMedia: (this.video as any).captureStream() });
             this.video!.play();
-        }, 5000);
+        }, waitSec * 1000);
     }
 
     private async getPoints(force?: boolean) {
@@ -84,5 +98,18 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
         setTimeout(() => {
             this.getPoints();
         });
+    }
+
+    private refreshText() {
+        this.sec++;
+
+        if (this.sec === waitSec) {
+            this.setState({ text: '' });
+        } else {
+            this.setState({ text: `This video will start in ${waitSec - this.sec} sec.` });
+            setTimeout(() => {
+                this.refreshText();
+            }, 1000);
+        }
     }
 }
