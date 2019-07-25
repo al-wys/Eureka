@@ -44,8 +44,8 @@ export class AudioAnalyser extends React.Component<IAudioAnalyserProps, IAudioAn
 
     public componentWillUnmount() {
         cancelAnimationFrame(this.rafId);
-        this.analyser!.disconnect();
-        this.source!.disconnect();
+        this.analyser && this.analyser.disconnect();
+        this.source && this.source.disconnect();
     }
 
     public render() {

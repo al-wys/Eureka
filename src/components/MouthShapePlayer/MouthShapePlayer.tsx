@@ -2,7 +2,7 @@ import React from 'react';
 
 import { IMouthShapePlayerProps } from './IMouthShapePlayer.types';
 import { IMouthShapePlayerState } from './IMouthShapePlayer.states';
-import { Stack, Text } from 'office-ui-fabric-react';
+import { Stack, Text, DefaultButton } from 'office-ui-fabric-react';
 
 import FaceDetecterHelper from '../../utils/FaceDetecterHelper';
 import { AudioAnalyser } from '../AudioAnalyser';
@@ -26,8 +26,16 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
         super(props);
 
         this.state = {
-            text: `This video will start in ${waitSec} sec.`
+            text: `This video will start in ${waitSec} sec.`,
+            src: props.src,
+            isPlaying: true
         };
+    }
+
+    public componentDidUpdate(prevProps: IMouthShapePlayerProps, prevState: IMouthShapePlayerState) {
+        if (prevProps.src !== this.props.src) {
+            this.setState({ src: this.props.src });
+        }
     }
 
     public componentDidMount() {
@@ -47,34 +55,46 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
                     <Text>{this.state.text}</Text>
                 </Stack>
                 <Stack styles={{ root: { position: 'relative' } }}>
-                    <>
-                        <Stack styles={{ root: { position: 'relative' } }}>
-                            <video
-                                autoPlay={false}
-                                height="auto"
-                                width="auto"
-                                ref={(ins) => this.video = ins}
-                                onLoadedMetadata={this.onLoadVideo}
-                                onEnded={() => this.onEndFunc && this.onEndFunc()}
-                            >
-                                <source src={this.props.src} type={this.props.type} />
-                            </video>
-                            <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
-                        </Stack>
-                        <Stack styles={{ root: { minHeight: '100px' } }}>
-                            {this.state.videoMedia ?
-                                <AudioAnalyser audio={this.state.videoMedia} addOnEndEventListener={(func) => this.onEndFunc = func} key={this.audioAnaId} /> :
-                                <></>
-                            }
-                        </Stack>
-                    </>
+                    {this.state.src ?
+                        <>
+                            <Stack styles={{ root: { position: 'relative' } }}>
+                                <video
+                                    autoPlay={false}
+                                    height="auto"
+                                    width="auto"
+                                    ref={(ins) => this.video = ins}
+                                    onLoadedMetadata={this.onLoadVideo}
+                                    onEnded={this.onEndVideo}
+                                >
+                                    <source src={this.state.src} type={this.props.type} />
+                                </video>
+                                <canvas style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} ref={(ins) => this.faceMarkCanvas = ins}></canvas>
+                            </Stack>
+                            <Stack styles={{ root: { minHeight: '100px' } }}>
+                                {this.state.videoMedia ?
+                                    <AudioAnalyser audio={this.state.videoMedia} addOnEndEventListener={(func) => this.onEndFunc = func} key={this.audioAnaId} /> :
+                                    <></>
+                                }
+                            </Stack>
+                        </> :
+                        <></>
+                    }
                 </Stack>
-                <Stack horizontal={true} horizontalAlign="space-between" tokens={{ childrenGap: 15 }}>
+                <Stack horizontalAlign="space-between" tokens={{ childrenGap: 15 }}>
+                    <DefaultButton disabled={this.state.isPlaying} text="Replay" onClick={this.onReplay} />
                     {/* <Stack grow={1}><PrimaryButton text="Play" /></Stack>
                     <Stack grow={1}><PrimaryButton text="Pause" /></Stack> */}
                 </Stack>
             </Stack>
         );
+    }
+
+    private onEndVideo = () => {
+        if (this.onEndFunc) {
+            this.onEndFunc();
+        }
+
+        this.setState({ isPlaying: false });
     }
 
     private onLoadVideo = async () => {
@@ -111,5 +131,17 @@ export class MouthShapePlayer extends React.Component<IMouthShapePlayerProps, IM
                 this.refreshText();
             }, 1000);
         }
+    }
+
+    private onReplay = () => {
+        this.setState({ src: undefined });
+        // this.audioAnaId = getId('audioAna');
+
+        setTimeout(() => {
+            this.setState({ src: this.props.src, isPlaying: true, videoMedia: undefined });
+
+            this.sec = -1;
+            this.refreshText();
+        }, 1000);
     }
 }

@@ -28,7 +28,7 @@ export class StudentPanel extends React.Component<{}, IStudentPanelState>{
                         <Separator style={{ width: '100%' }} />
                     </Stack>
                 </Stack>
-                <Stack>
+                <Stack tokens={{ childrenGap: 15 }}>
                     {this.state.stage === 'record' ?
                         <MouthShapeRecorder key={this.recorderId} onPreviewRecording={this.previewRecord} /> :
                         <>
